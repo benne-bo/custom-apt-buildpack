@@ -1,0 +1,6 @@
+---
+packages:
+  - libboost-all-dev
+  - libflann1.9
+  - libpcl-dev
+  - libopencv-dev
