@@ -1,4 +1,8 @@
 ---
+keys:
+- https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x5a712699873e1cdc627a2f800c32b421f62def3f
+repos:
+- deb http://ppa.launchpad.net/bennebo/pcl-1.9.1/ubuntu bionic mai
 packages:
   - libboost-all-dev
   - libflann1.9
