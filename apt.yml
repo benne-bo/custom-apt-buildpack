@@ -4,3 +4,4 @@ packages:
   - libflann1.9
   - libpcl-dev
   - libopencv-dev
+  - nlohmann-json-dev
