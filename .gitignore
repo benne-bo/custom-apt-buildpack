@@ -1,3 +1,6 @@
-pkg
+/pkg
 .bin
 apt_buildpack-*.zip
+!vendor/**
+.DS_Store
+.idea

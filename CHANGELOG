@@ -1,3 +1,41 @@
+v0.2.2 Dec 18, 2019
+====================
+
+* No user facing changes. Updated internal libraries.
+
+v0.2.1 Nov 08, 2019
+====================
+
+* No user facing changes. Updated internal libraries.
+
+v0.2.0 Sep 06, 2019
+=====================
+
+* Remove support for cflinuxfs2.
+  (https://www.pivotaltracker.com/story/show/168269855)
+
+
+v0.1.9 Aug 29, 2019
+====================
+
+* Adds support for installing apt packages from custom repositories in offline environments.
+  - Thanks to @abhinavrau for the PR!
+	(https://www.pivotaltracker.com/story/show/167925100)
+
+* Cleans up output to clear up confusion. Yay clarity!
+  (https://www.pivotaltracker.com/story/show/163646135)
+
+v0.1.8 May 07, 2019
+====================
+
+* update install_go.sh script to use go 1.12.4
+  Re-release with go1.12 binaries
+
+v0.1.7 Apr 23, 2019
+====================
+
+* Remove warning logs causing bosh cli error
+
 v0.1.6 Mar 01, 2019
 ====================
 

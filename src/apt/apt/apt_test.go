@@ -236,8 +236,8 @@ var _ = Describe("Apt", func() {
 
 	Describe("Update", func() {
 		It("runs apt update with expected options", func() {
-			mockCommand.EXPECT().Output(
-				"/", "apt-get",
+			mockCommand.EXPECT().Execute(
+				"/", gomock.Any(), gomock.Any(), "apt-get",
 				"-o", "debug::nolocking=true",
 				"-o", "dir::cache="+cacheDir+"/apt/cache",
 				"-o", "dir::state="+cacheDir+"/apt/state",
@@ -245,7 +245,7 @@ var _ = Describe("Apt", func() {
 				"-o", "dir::etc::trusted="+cacheDir+"/apt/etc/trusted.gpg",
 				"-o", "Dir::Etc::preferences="+cacheDir+"/apt/etc/preferences",
 				"update",
-			).Return("Shell output", nil)
+			).Return(nil)
 
 			err := a.Update()
 			Expect(err).ToNot(HaveOccurred())
@@ -303,7 +303,7 @@ var _ = Describe("Apt", func() {
 				"-o", "dir::etc::sourcelist="+cacheDir+"/apt/sources/sources.list",
 				"-o", "dir::etc::trusted="+cacheDir+"/apt/etc/trusted.gpg",
 				"-o", "Dir::Etc::preferences="+cacheDir+"/apt/etc/preferences",
-				"-y", "--force-yes", "-d", "install", "--reinstall",
+				"-y", "--allow-downgrades", "--allow-remove-essential", "--allow-change-held-packages", "-d", "install", "--reinstall",
 			).Return("apt output", nil)
 
 			Expect(a.DownloadAll()).To(Succeed())

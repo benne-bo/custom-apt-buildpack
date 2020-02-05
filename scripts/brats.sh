@@ -7,9 +7,9 @@ source .envrc
 
 GINKGO_NODES=${GINKGO_NODES:-3}
 GINKGO_ATTEMPTS=${GINKGO_ATTEMPTS:-2}
-export CF_STACK=${CF_STACK:-cflinuxfs2}
+export CF_STACK=${CF_STACK:-cflinuxfs3}
 
 cd src/*/brats
 
 echo "Run Buildpack Runtime Acceptance Tests"
-ginkgo -r --flakeAttempts=$GINKGO_ATTEMPTS -nodes $GINKGO_NODES
+ginkgo -r -mod vendor --flakeAttempts=$GINKGO_ATTEMPTS -nodes $GINKGO_NODES

@@ -1,6 +1,7 @@
 package apt
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 
 type Command interface {
 	Output(string, string, ...string) (string, error)
+	Execute(dir string, stdout io.Writer, stderr io.Writer, program string, args ...string) error
 }
 
 type Repository struct {
@@ -46,6 +48,8 @@ type Apt struct {
 	command            Command
 	options            []string
 	aptFilePath        string
+	TruncateSources    bool         `yaml:"truncatesources,omitempty"`
+	CleanCache         bool         `yaml:"cleancache,omitempty"`
 	Keys               []string     `yaml:"keys"`
 	GpgAdvancedOptions []string     `yaml:"gpg_advanced_options"`
 	Repos              []Repository `yaml:"repos"`
@@ -159,7 +163,14 @@ func (a *Apt) AddKeys() error {
 }
 
 func (a *Apt) AddRepos() error {
-	f, err := os.OpenFile(a.sourceList, os.O_APPEND|os.O_WRONLY, 0600)
+	openmode := os.O_APPEND
+
+	if a.TruncateSources {
+		openmode = os.O_TRUNC
+		fmt.Print("Truncating sources.list file.\n")
+	}
+
+	f, err := os.OpenFile(a.sourceList, openmode|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -169,6 +180,7 @@ func (a *Apt) AddRepos() error {
 		if _, err = f.WriteString("\n" + repo.Name); err != nil {
 			return err
 		}
+		fmt.Printf("Added repo %v\n", repo)
 	}
 
 	prefFile, err := os.OpenFile(a.preferences, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
@@ -188,10 +200,30 @@ func (a *Apt) AddRepos() error {
 	return nil
 }
 
+func (a *Apt) HasClean() bool {
+	return a.CleanCache
+}
+
+func (a *Apt) Clean() error {
+	fmt.Printf("Cleaning apt cache \n")
+	args := append(a.options, "clean")
+	if out, err := a.command.Output("/", "apt-get", args...); err != nil {
+		fmt.Printf("Info: error running apt-get clean %s\n\n%s", out, err)
+	}
+	args2 := append(a.options, "autoclean")
+	if out, err := a.command.Output("/", "apt-get", args2...); err != nil {
+		fmt.Printf("Info: error running apt-get autoclean %s\n\n%s", out, err)
+	}
+
+	return nil
+}
+
 func (a *Apt) Update() error {
 	args := append(a.options, "update")
-	if out, err := a.command.Output("/", "apt-get", args...); err != nil {
-		return fmt.Errorf("failed to apt-get update %s\n\n%s", out, err)
+
+	var errBuff bytes.Buffer
+	if err := a.command.Execute("/", &errBuff, &errBuff, "apt-get", args...); err != nil {
+		return fmt.Errorf("failed to apt-get update %s\n\n%s", errBuff.String(), err)
 	}
 	return nil
 }
@@ -215,7 +247,7 @@ func (a *Apt) DownloadAll() error {
 	}
 
 	// download all repo packages in one invocation
-	aptArgs := append(a.options, "-y", "--force-yes", "-d", "install", "--reinstall")
+	aptArgs := append(a.options, "-y", "--allow-downgrades", "--allow-remove-essential", "--allow-change-held-packages", "-d", "install", "--reinstall")
 	args := append(aptArgs, repoPackages...)
 	out, err := a.command.Output("/", "apt-get", args...)
 	if err != nil {

@@ -29,7 +29,7 @@ func CompileExtensionPackage(bpDir, version string, cached bool, stack string) (
 	if err != nil {
 		return "", fmt.Errorf("Failed to get the absolute path of %s: %v", bpDir, err)
 	}
-	dir, err := copyDirectory(bpDir)
+	dir, err := CopyDirectory(bpDir)
 	if err != nil {
 		return "", fmt.Errorf("Failed to copy %s: %v", bpDir, err)
 	}
@@ -122,7 +122,7 @@ func downloadDependency(dependency Dependency, cacheDir string) (File, error) {
 	}
 
 	if _, err := os.Stat(filepath.Join(cacheDir, file)); err != nil {
-		if err := downloadFromURI(dependency.URI, filepath.Join(cacheDir, file)); err != nil {
+		if err := DownloadFromURI(dependency.URI, filepath.Join(cacheDir, file)); err != nil {
 			return File{}, err
 		}
 	}
@@ -143,10 +143,11 @@ func Package(bpDir, cacheDir, version, stack string, cached bool) (string, error
 	if err != nil {
 		return "", err
 	}
-	dir, err := copyDirectory(bpDir)
+	dir, err := CopyDirectory(bpDir)
 	if err != nil {
 		return "", err
 	}
+	defer os.RemoveAll(dir)
 
 	err = ioutil.WriteFile(filepath.Join(dir, "VERSION"), []byte(version), 0644)
 	if err != nil {
@@ -233,7 +234,7 @@ func Package(bpDir, cacheDir, version, stack string, cached bool) (string, error
 	return zipFile, err
 }
 
-func downloadFromURI(uri, fileName string) error {
+func DownloadFromURI(uri, fileName string) error {
 	err := os.MkdirAll(filepath.Dir(fileName), 0755)
 	if err != nil {
 		return err
@@ -345,7 +346,7 @@ func ZipFiles(filename string, files []File) error {
 	return nil
 }
 
-func copyDirectory(srcDir string) (string, error) {
+func CopyDirectory(srcDir string) (string, error) {
 	destDir, err := ioutil.TempDir("", "buildpack-packager")
 	if err != nil {
 		return "", err
@@ -374,7 +375,7 @@ func copyDirectory(srcDir string) (string, error) {
 				return fmt.Errorf("Error while creating '%s' as symlink to '%s': %v", dest, target, err)
 			}
 		} else if info.IsDir() {
-			err = os.MkdirAll(dest, info.Mode())
+			err = os.MkdirAll(dest, 0755)
 			if err != nil {
 				return err
 			}
@@ -390,14 +391,27 @@ func copyDirectory(srcDir string) (string, error) {
 				return err
 			}
 
-			fh, err := os.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, info.Mode())
+			fh, err := os.OpenFile(dest, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 			if err != nil {
 				return err
 			}
 
 			_, err = io.Copy(fh, src)
-			fh.Close()
-			return err
+			if err != nil {
+				return err
+			}
+
+			err = fh.Chmod(info.Mode())
+			if err != nil {
+				return err
+			}
+
+			err = fh.Close()
+			if err != nil {
+				return err
+			}
+
+			return nil
 		}
 		return nil
 	})
