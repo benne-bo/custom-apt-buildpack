@@ -7,7 +7,9 @@ repos:
 packages:
   - libboost-iostreams-dev
   - libboost-filesystem-dev
+  - libboost-system-dev
   - libflann1.9
-  - libpcl-dev
+  - libpcl-common1.9
+  - libpcl-io1.9
   - libopencv-dev
   - nlohmann-json-dev
