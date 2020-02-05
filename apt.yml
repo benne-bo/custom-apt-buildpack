@@ -5,7 +5,7 @@ keys:
 repos:
 - deb http://ppa.launchpad.net/bennebo/pcl-1.9.1/ubuntu bionic main
 packages:
-  - libboost-all-dev
+  - libboost-dev
   - libflann1.9
   - libpcl-dev
   - libopencv-dev
