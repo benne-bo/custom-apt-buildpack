@@ -5,21 +5,9 @@ keys:
 repos:
 - deb http://ppa.launchpad.net/bennebo/pcl-1.9.1/ubuntu bionic main
 packages:
-  - libboost-iostreams-dev
-  - libboost-filesystem-dev
-  - libboost-system-dev
+  - libboost-all-dev
   - libflann1.9
-  - libpcl-common1.9
-  - libpcl-io1.9
-  - libpcl-registration1.9
-  - libpcl-search1.9
-  - libpcl-features1.9
-  - libpcl-visualization1.9
-  - libpcl-filters1.9
-  - libpcl-segmentation1.9
-  - libpcl-kdtree1.9
-  - libpcl-sample-consensus1.9
-  - libpcl-surface1.9
-  - pcl-tools
+  - libpcl-dev
   - libopencv-dev
   - nlohmann-json-dev
+  
